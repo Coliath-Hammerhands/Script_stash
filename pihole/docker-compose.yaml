@@ -23,7 +23,7 @@ services:
       # Set a password to access the web interface. Not setting one will result in a random password being assigned
       FTLCONF_webserver_api_password: 'hi_pi_hole'
       # If using Docker's default `bridge` network setting the dns listening mode should be set to 'all'
-      FTLCONF_dns_listeningMode: 'all'
+      # FTLCONF_dns_listeningMode: 'all'
       PIHOLE_DNS_1: 8.8.8.8 # the main DNS resolver 
       PIHOLE_DNS_2: 8.8.4.4 # secondary DNS resolver
     # Volumes store your data between container upgrades
