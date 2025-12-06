@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    environment:
+      - PUID=1000 # Replace with your user ID
+      - PGID=1000 # Replace with your group ID
+    volumes:
+      - /path/to/jellyfin/config:/config # Host path for config
+      - /path/to/jellyfin/cache:/cache # Host path for cache
+      - /path/to/your/media:/media # Host path to your media files
+    ports:
+      - "8096:8096" # Jellyfin web interface
+    restart: unless-stopped

@@ -1,0 +1,12 @@
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: mediaserver-pv
+    spec:
+      capacity:
+        storage: 1000Gi # Example capacity
+      accessModes:
+        - ReadWriteMany # Or ReadWriteMany, ReadOnlyMany
+      persistentVolumeReclaimPolicy: Retain
+      hostPath:
+        path: "/home/cole/pt_hdd" # Path on the node

@@ -1,0 +1,48 @@
+#shared/shared/master/manifests/easymed.yml
+
+
+#Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: easymed
+
+
+---
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: easymed
+  namespace: easymed
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: easymed
+  template:
+    metadata:
+      labels:
+        app: easymed
+    spec:
+      containers:
+      - name: easymed
+        image: mosesmbadi/easymedfrontend
+        ports:
+        - containerPort: 3000
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: easymed
+  namespace: easymed
+spec:
+  selector:
+    app: easymed
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  type: NodePort
