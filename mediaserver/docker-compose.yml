@@ -45,7 +45,7 @@ services:
       #- ${media_path}/media:/jellyfin_media
       - ${config_path}/sonarr/config:/config # Replace with your desired config path
       - ${media_path}/tvshows:/tv # Replace with your TV show library path
-      - ${media_path}/downloads/:/downloads/ # Replace with your download client's download path 
+      - ${media_path}/downloads/qbit_downloads:/downloads/ # Replace with your download client's download path 
       #- ${media_path}/sonar_dow:/downloads/complete/tv-sonarr
     ports:
       - 8989:8989
@@ -57,11 +57,13 @@ services:
       - PUID=1000 # Replace with your user ID
       - PGID=1000 # Replace with your group ID
       - TZ=America/New_York # Replace with your timezone
+
     volumes:
       - ${media_path}/media/movies:/jellyfin_media/movies
       - ${config_path}/radarr/config:/config # Host path for Radarr configuration
       - ${media_path}/movies:/movies # Host path for your movie library
-      - ${media_path}/downloads/:/downloads/
+      - ${media_path}/downloads/qbit_downloads:/downloads/
+      # - ${media_path}/radarr_folder/:/downloads/complete/radarr
       - ${media_path}/data:/data
       #- ${media_path}/radarr_downloads_folder:/data/complete/radarr
     ports:
@@ -132,6 +134,10 @@ services:
           - WIREGUARD_PRESHARED_KEY=${PresharedKey}
           - WIREGUARD_ADDRESSES=${Address}
           - SERVER_COUNTRIES=United States
+          # - FIREWALL_VPN_INPUT_PORTS=6888
+          # - PORT_FORWARD_ONLY=on
+          # - VPN_PORT_FORWARDING=on
+          # - UPDATER_PERIOD=24h
         ports:
           - 8888:8888/tcp # HTTP proxy
           - 8388:8388/tcp # Shadowsocks
@@ -154,6 +160,7 @@ services:
           - PGID=1000
           - TZ=Etc/UTC # Your timezone
           - WEBUI_PORT=8082
+          - TORRENTING_PORT=6888
         volumes:
           - ${config_path}/qbittorrent/config:/config # Persistent storage for qBittorrent config
           - ${media_path}/downloads/qbit_downloads:/downloads # Your download directory
