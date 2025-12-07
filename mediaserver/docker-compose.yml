@@ -4,9 +4,7 @@ services:
     container_name: jellyfin
     # gpus: all
     # Optional - specify the uid and gid you would like Jellyfin to use instead of root
-    # user: uid:gid
-
-      
+    # user: 1000:1000
     ports:
       - 8096:8096/tcp
       - 7359:7359/udp
@@ -18,11 +16,7 @@ services:
       - type: bind
         source: ${media_path}
         target: /media
-        read_only: true
-      # - type: bind
-      #   source: /path/to/media2
-      #   target: /media2
-      #   read_only: true
+        # read_only: true 
       # Optional - extra fonts to be used during transcoding with subtitle burn-in
       - type: bind
         source: ${config_path}/jellyfin/fonts
@@ -32,8 +26,8 @@ services:
     # Optional - alternative address used for autodiscovery
     environment:
       - JELLYFIN_PublishedServerUrl=http://example.com
-      - PUID=1000
-      - PGID=1000
+      # - PUID=1000
+      # - PGID=1000
       - TZ=America/New_York # Replace with your timezone
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
@@ -145,9 +139,10 @@ services:
           - 8082:8082 # qBittorrent web UI port added here
           - 6881-6889:6881-6889 # qBittorrent listen ports (adjust as needed)
           #transmission ports
-          - 9091:9091
-          - 51413:51413
-          - 51413:51413/udp
+          # - 9091:9091
+          # - 51413:51413
+          # - 51413:51413/udp
+          # - 51413:51413/tcp
         volumes:
           - ${config_path}/gluetun/config:/gluetun # Persistent storage for Gluetun config
         restart: unless-stopped
@@ -163,29 +158,19 @@ services:
           - ${config_path}/qbittorrent/config:/config # Persistent storage for qBittorrent config
           - ${media_path}/downloads/qbit_downloads:/downloads # Your download directory
         restart: unless-stopped
-  transmission:
-    image: lscr.io/linuxserver/transmission:latest
-    container_name: transmission
-    network_mode: service:gluetun # Routes qBittorrent through Gluetun
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      # - TRANSMISSION_WEB_HOME= #optional
-      # - USER= cole #optional
-      # - PASS= "transmission_jjkj" #optional
-      # - WHITELIST= #optional
-      # - PEERPORT= #optional
-      # - HOST_WHITELIST= #optional
-      - HOST_WHITELIST_ENTRIES=transmission.local,bosgame.lan
-    volumes:
-      - ${config_path}/transmission/data:/config
-      - ${media_path}/downloads:/downloads/ #optional
-      - ${config_path}/watch:/watch #optional
-      - ${media_path}/media:/jellyfin_media
-      - ${media_path}/data:/data
-    # ports:
-    #   - 9091:9091
-    #   - 51413:51413
-    #   - 51413:51413/udp
-    restart: unless-stopped
+  # transmission:
+  #   image: lscr.io/linuxserver/transmission:latest
+  #   container_name: transmission
+  #   network_mode: service:gluetun # Routes qBittorrent through Gluetun
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/New_York 
+  #     - HOST_WHITELIST_ENTRIES=transmission.local,bosgame.lan
+  #   volumes:
+  #     - ${config_path}/transmission/data:/config
+  #     - ${media_path}/downloads:/downloads/ #optional
+  #     - ${config_path}/watch:/watch #optional
+  #     - ${media_path}/media:/jellyfin_media
+  #     - ${media_path}/data:/data 
+  #   restart: unless-stopped
