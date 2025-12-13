@@ -11,11 +11,11 @@ services:
     volumes:
       - ${config_path}/jellyfin/config:/config
       - ${config_path}/jellyfin/cache:/cache
-      - ${media_path}/downloads:/downloads
-      - ${media_path}/media:/media
-      - type: bind
-        source: ${media_path}
-        target: /media
+      # - ${downloads_path}:/downloads 
+      - ${secondary_drive}:/drive2
+      # - type: bind
+      #   source: ${media_path}
+      #   target: /media
         # read_only: true 
       # Optional - extra fonts to be used during transcoding with subtitle burn-in
       - type: bind
@@ -26,8 +26,6 @@ services:
     # Optional - alternative address used for autodiscovery
     environment:
       - JELLYFIN_PublishedServerUrl=http://example.com
-      # - PUID=1000
-      # - PGID=1000
       - TZ=America/New_York # Replace with your timezone
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
@@ -40,13 +38,12 @@ services:
       - PGID=1000
       - TZ=America/New_York # Replace with your timezone
     volumes:
-      #- ${media_path}/downloads/complete/tv-sonarr:/data
-      - ${media_path}/media/tv:/data
-      #- ${media_path}/media:/jellyfin_media
+      # - ${media_path}/media/tv:/data
+      - ${secondary_drive}:/drive2
+      - ${media_path}/anime/tv:/anime
+      - ${downloads_path}:/downloads
       - ${config_path}/sonarr/config:/config # Replace with your desired config path
       - ${media_path}/tvshows:/tv # Replace with your TV show library path
-      - ${media_path}/downloads/qbit_downloads:/downloads/ # Replace with your download client's download path 
-      #- ${media_path}/sonar_dow:/downloads/complete/tv-sonarr
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -59,13 +56,12 @@ services:
       - TZ=America/New_York # Replace with your timezone
 
     volumes:
+      - ${secondary_drive}:/drive2
       - ${media_path}/media/movies:/jellyfin_media/movies
       - ${config_path}/radarr/config:/config # Host path for Radarr configuration
       - ${media_path}/movies:/movies # Host path for your movie library
-      - ${media_path}/downloads/qbit_downloads:/downloads/
-      # - ${media_path}/radarr_folder/:/downloads/complete/radarr
-      - ${media_path}/data:/data
-      #- ${media_path}/radarr_downloads_folder:/data/complete/radarr
+      - ${downloads_path}:/downloads
+      # - ${media_path}/data:/data
     ports:
       - 7878:7878 # Host port:Container port
     restart: unless-stopped
@@ -134,11 +130,10 @@ services:
           - WIREGUARD_PRESHARED_KEY=${PresharedKey}
           - WIREGUARD_ADDRESSES=${Address}
           - SERVER_COUNTRIES=United States
-          # - FIREWALL_VPN_INPUT_PORTS=6888
-          # - PORT_FORWARD_ONLY=on
-          # - VPN_PORT_FORWARDING=on
-          # - UPDATER_PERIOD=24h
+          - FIREWALL_VPN_INPUT_PORTS=${open_torrent_port}
         ports:
+          - 8000:8000 # Gluetun control server port
+          - ${open_torrent_port}:${open_torrent_port}
           - 8888:8888/tcp # HTTP proxy
           - 8388:8388/tcp # Shadowsocks
           - 8388:8388/udp # Shadowsocks
@@ -146,9 +141,6 @@ services:
           - 6881-6889:6881-6889 # qBittorrent listen ports (adjust as needed)
           #transmission ports
           # - 9091:9091
-          # - 51413:51413
-          # - 51413:51413/udp
-          # - 51413:51413/tcp
         volumes:
           - ${config_path}/gluetun/config:/gluetun # Persistent storage for Gluetun config
         restart: unless-stopped
@@ -160,10 +152,13 @@ services:
           - PGID=1000
           - TZ=Etc/UTC # Your timezone
           - WEBUI_PORT=8082
-          - TORRENTING_PORT=6888
+          - TORRENTING_PORT=${open_torrent_port}
+        depends_on: 
+          gluetun: 
+            condition: service_healthy
         volumes:
           - ${config_path}/qbittorrent/config:/config # Persistent storage for qBittorrent config
-          - ${media_path}/downloads/qbit_downloads:/downloads # Your download directory
+          - ${downloads_path}:/downloads # Your download directory
         restart: unless-stopped
   # transmission:
   #   image: lscr.io/linuxserver/transmission:latest
@@ -174,10 +169,14 @@ services:
   #     - PGID=1000
   #     - TZ=America/New_York 
   #     - HOST_WHITELIST_ENTRIES=transmission.local,bosgame.lan
+  #     - TORRENTING_PORT=${open_torrent_port}
   #   volumes:
   #     - ${config_path}/transmission/data:/config
-  #     - ${media_path}/downloads:/downloads/ #optional
+  #     - ${downloads_path}:/downloads
   #     - ${config_path}/watch:/watch #optional
   #     - ${media_path}/media:/jellyfin_media
   #     - ${media_path}/data:/data 
+  #   depends_on: 
+  #     gluetun: 
+  #       condition: service_healthy
   #   restart: unless-stopped
