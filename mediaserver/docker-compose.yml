@@ -8,6 +8,10 @@ services:
     ports:
       - 8096:8096/tcp
       - 7359:7359/udp
+    group_add:
+      - 992 # video group for hardware acceleration
+    devices:
+      - /dev/dri:/dev/dri 
     volumes:
       - ${config_path}/jellyfin/config:/config
       - ${config_path}/jellyfin/cache:/cache
@@ -95,21 +99,21 @@ services:
       - 9696:9696 # Host port:Container port
     restart: unless-stopped
   
-  sabnzbd:
-    image: lscr.io/linuxserver/sabnzbd:latest
-    container_name: sabnzbd
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=America/New_York
-      - HOST_WHITELIST_ENTRIES=sabnzbd.local,bosgame.lan
-    volumes:
-      - ${config_path}/sabnzbd/config:/config
-      - ${media_path}/sabnzbd_downloads:/incomplete-downloads #optional
-      - ${media_path}/sabnzbd_downloads:/downloads #optional
-    ports:
-      - 8080:8080
-    restart: unless-stopped
+  # sabnzbd:
+  #   image: lscr.io/linuxserver/sabnzbd:latest
+  #   container_name: sabnzbd
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/New_York
+  #     - HOST_WHITELIST_ENTRIES=sabnzbd.local,bosgame.lan
+  #   volumes:
+  #     - ${config_path}/sabnzbd/config:/config
+  #     - ${media_path}/sabnzbd_downloads:/incomplete-downloads #optional
+  #     - ${media_path}/sabnzbd_downloads:/downloads #optional
+  #   ports:
+  #     - 8080:8080
+  #   restart: unless-stopped
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
