@@ -13,7 +13,15 @@ repos:
       # uv version.
       rev: 0.9.14
       hooks:
-        - id: uv-lock
+        - id: uv-lock 
+    - repo: https://github.com/hukkin/mdformat
+      rev: 1.0.0 # Use the latest stable version
+      hooks:
+        - id: mdformat
+          # Optionally add plugins for extensions like GitHub Flavored Markdown (GFM)
+          additional_dependencies:
+            - mdformat-gfm
+
     # - repo: local
     #   hooks:
     #     - id: uv-sync
