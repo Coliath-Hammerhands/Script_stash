@@ -34,9 +34,48 @@ services:
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+
+  gluetun:
+        image: qmcgaw/gluetun:latest
+        container_name: gluetun
+        cap_add:
+          - NET_ADMIN
+        environment:
+          - VPN_SERVICE_PROVIDER=airvpn
+          - VPN_TYPE=wireguard # or openvpn
+          - WIREGUARD_PRIVATE_KEY=${PrivateKey}
+          - WIREGUARD_PRESHARED_KEY=${PresharedKey}
+          - WIREGUARD_ADDRESSES=${Address}
+          - SERVER_COUNTRIES=United States
+          - FIREWALL_VPN_INPUT_PORTS=${open_torrent_port}
+          - WIREGUARD_MTU=1280
+          - FIREWALL_OUTBOUND_SUBNETS=172.18.0.0/24,192.168.1.0/24
+        ports:
+          - 8000:8000 # Gluetun control server port
+          - ${open_torrent_port}:${open_torrent_port}
+          - 8888:8888/tcp # HTTP proxy
+          - 8388:8388/tcp # Shadowsocks
+          - 8388:8388/udp # Shadowsocks
+          - 8082:8082 # qBittorrent web UI port added here
+          - 6881-6889:6881-6889 # qBittorrent listen ports (adjust as needed)
+          - 9000:9000
+          - 9696:9696 # prowlarr
+          - 8989:8989 # sonarr
+          - 7878:7878 # radarr
+          - 8191:8191 # flaresolverr
+          #transmission ports
+          # - 9091:9091
+        volumes:
+          - ${config_path}/gluetun/config:/gluetun # Persistent storage for Gluetun config
+        restart: unless-stopped
+
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
+    network_mode: service:gluetun # Routes qBittorrent through Gluetun
+    depends_on:
+          gluetun:
+            condition: service_healthy
     environment:
       - PUID=1000
       - PGID=1000
@@ -48,12 +87,16 @@ services:
       - ${downloads_path}:/downloads
       - ${config_path}/sonarr/config:/config # Replace with your desired config path
       - ${media_path}/tvshows:/tv # Replace with your TV show library path
-    ports:
-      - 8989:8989
+    # ports:
+    #   - 8989:8989
     restart: unless-stopped
   radarr:
     image: linuxserver/radarr:latest
     container_name: radarr
+    network_mode: service:gluetun # Routes qBittorrent through Gluetun
+    depends_on:
+          gluetun:
+            condition: service_healthy
     environment:
       - PUID=1000 # Replace with your user ID
       - PGID=1000 # Replace with your group ID
@@ -66,8 +109,8 @@ services:
       - ${media_path}/movies:/movies # Host path for your movie library
       - ${downloads_path}:/downloads
       # - ${media_path}/data:/data
-    ports:
-      - 7878:7878 # Host port:Container port
+    # ports:
+    #   - 7878:7878 # Host port:Container port
     restart: unless-stopped
   jackett:
     image: lscr.io/linuxserver/jackett:latest
@@ -85,9 +128,30 @@ services:
     ports:
       - 9117:9117
     restart: unless-stopped
+
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    network_mode: service:gluetun # Routes qBittorrent through Gluetun
+    depends_on:
+          gluetun:
+            condition: service_healthy
+    # ports:
+    #   - "8191:8191"
+    environment:
+      - TZ=America/New_York # Optional: Set your local time zone
+      - LOG_LEVEL=info # Optional: Adjust logging level (info, debug, warn, error)
+    restart: unless-stopped
+
+
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
+    network_mode: service:gluetun # Routes qBittorrent through Gluetun
+    depends_on:
+          gluetun:
+            condition: service_healthy
     environment:
       - PUID=1000 # Your User ID
       - PGID=1000 # Your Group ID
@@ -95,61 +159,15 @@ services:
     volumes:
       - ${config_path}/prowlarr/config:/config # Host path for Prowlarr configuration
       - ${media_path}/prowlarr_media:/media # Host path for media files (accessible by Prowlarr and other Arr apps)
-    ports:
-      - 9696:9696 # Host port:Container port
+    # ports:
+    #   - 9696:9696 # Host port:Container port
+    
     restart: unless-stopped
-  
-  # sabnzbd:
-  #   image: lscr.io/linuxserver/sabnzbd:latest
-  #   container_name: sabnzbd
-  #   environment:
-  #     - PUID=1000
-  #     - PGID=1000
-  #     - TZ=America/New_York
-  #     - HOST_WHITELIST_ENTRIES=sabnzbd.local,bosgame.lan
-  #   volumes:
-  #     - ${config_path}/sabnzbd/config:/config
-  #     - ${media_path}/sabnzbd_downloads:/incomplete-downloads #optional
-  #     - ${media_path}/sabnzbd_downloads:/downloads #optional
-  #   ports:
-  #     - 8080:8080
-  #   restart: unless-stopped
-  flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
-    container_name: flaresolverr
-    ports:
-      - "8191:8191"
-    environment:
-      - TZ=America/New_York # Optional: Set your local time zone
-      - LOG_LEVEL=info # Optional: Adjust logging level (info, debug, warn, error)
-    restart: unless-stopped
-  gluetun:
-        image: qmcgaw/gluetun:latest
-        cap_add:
-          - NET_ADMIN
-        environment:
-          - VPN_SERVICE_PROVIDER=airvpn
-          - VPN_TYPE=wireguard # or openvpn
-          - WIREGUARD_PRIVATE_KEY=${PrivateKey}
-          - WIREGUARD_PRESHARED_KEY=${PresharedKey}
-          - WIREGUARD_ADDRESSES=${Address}
-          - SERVER_COUNTRIES=United States
-          - FIREWALL_VPN_INPUT_PORTS=${open_torrent_port}
-        ports:
-          - 8000:8000 # Gluetun control server port
-          - ${open_torrent_port}:${open_torrent_port}
-          - 8888:8888/tcp # HTTP proxy
-          - 8388:8388/tcp # Shadowsocks
-          - 8388:8388/udp # Shadowsocks
-          - 8082:8082 # qBittorrent web UI port added here
-          - 6881-6889:6881-6889 # qBittorrent listen ports (adjust as needed)
-          #transmission ports
-          # - 9091:9091
-        volumes:
-          - ${config_path}/gluetun/config:/gluetun # Persistent storage for Gluetun config
-        restart: unless-stopped
+
+
   qbittorrent:
         image: lscr.io/linuxserver/qbittorrent:latest
+        container_name: qbittorrent
         network_mode: service:gluetun # Routes qBittorrent through Gluetun
         environment:
           - PUID=1000
@@ -183,4 +201,19 @@ services:
   #   depends_on: 
   #     gluetun: 
   #       condition: service_healthy
+  #   restart: unless-stopped
+  # sabnzbd:
+  #   image: lscr.io/linuxserver/sabnzbd:latest
+  #   container_name: sabnzbd
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #     - TZ=America/New_York
+  #     - HOST_WHITELIST_ENTRIES=sabnzbd.local,bosgame.lan
+  #   volumes:
+  #     - ${config_path}/sabnzbd/config:/config
+  #     - ${media_path}/sabnzbd_downloads:/incomplete-downloads #optional
+  #     - ${media_path}/sabnzbd_downloads:/downloads #optional
+  #   ports:
+  #     - 8080:8080
   #   restart: unless-stopped
