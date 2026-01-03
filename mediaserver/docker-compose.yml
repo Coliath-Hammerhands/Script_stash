@@ -172,7 +172,7 @@ services:
         environment:
           - PUID=1000
           - PGID=1000
-          - TZ=Etc/UTC # Your timezone
+          - TZ=America/New_York # Your timezone
           - WEBUI_PORT=8082
           - TORRENTING_PORT=${open_torrent_port}
         depends_on: 

@@ -5,10 +5,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       # - /root/.docker/config.json:/config.json #Optional - if you use a private registry.
     environment:
-      - WATCHTOWER_NOTIFICATIONS=shoutrrr
-      - DOCKER_API_VERSION=1.44
-      - WATCHTOWER_SCHEDULE=0 4 * * * * # Run daily at 4:00:00 AM
+      WATCHTOWER_SCHEDULE: 0 0 4 * * *
+      WATCHTOWER_NOTIFICATIONS: shoutrrr
+      DOCKER_API_VERSION: 1.44
+      TZ: America/New_York
+      # - WATCHTOWER_SCHEDULE="0 0 4 * * *"
+      # - WATCHTOWER_SCHEDULE="0 0 4 * * *" # Run daily at 4:00:00 AM
       # - 'WATCHTOWER_NOTIFICATION_TEMLATE={{range .}}{{.Time.Format "12-01-2020 15:04:05"}} ({{.Level}})\':\' {{.Message}}{{println}}{{end}}'
-      - WATCHTOWER_NOTIFICATION_URL=discord://BDCb0asx14Mgurj5B0iEaAfRo6G6-SO42CV8yytByAjTnCZ4XScVmZIExIwOE-3_syvU@1455689612260409539
+      WATCHTOWER_NOTIFICATION_URL: discord://BDCb0asx14Mgurj5B0iEaAfRo6G6-SO42CV8yytByAjTnCZ4XScVmZIExIwOE-3_syvU@1455689612260409539
     # command: --interval 30 # For testing
     restart: unless-stopped
