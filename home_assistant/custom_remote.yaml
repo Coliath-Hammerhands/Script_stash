@@ -1,0 +1,153 @@
+type: custom:firemote-card
+entity: none
+device_family: none
+device_type: other
+compatibility_mode: default
+defaultRemoteStyle_override: AL2
+app_launcher_relative_size: "-7"
+visible_name_text: 🔥 Sony 🔥
+show_media_controls: false
+hide_button_group_frame: false
+skin: "#193348"
+useCustomSkin: false
+dpad_style: minimal
+scale: "82"
+button_overrides:
+  volume-up-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: VolumeUp
+  volume-down-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: VolumeDown
+  mute-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: Mute
+  up-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: CursorUp
+  down-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: CursorDown
+  left-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: CursorLeft
+  right-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: CursorRight
+  center-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: DpadCenter
+  power-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: TvPower
+  back-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: Return
+  rewind-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: Rewind
+  fastforward-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: Forward
+  playpause-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: PlayPause
+  home-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: Home
+  reboot-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: Input
+  hamburger-button:
+    action: remote.send_command
+    target:
+      entity_id: remote.bravia_kd_43x85k
+    data:
+      command: Options
+view_layout:
+  position: main
+grid_options:
+  columns: full
+  rows: 8
+name_position: bottom
+visible_name_text_color: "#4d4d4d"
+custom_launchers:
+  - friendly_name: Toggle Lounge
+    label: Lights
+    image_path: >-
+      https://upload.wikimedia.org/wikipedia/commons/2/28/Flash-outlined-thin-circular-button.svg
+    color: Blue
+    background: white
+    action: light.toggle
+    data:
+      transition: 5
+    target:
+      area_id: lounge
+  - friendly_name: Dim Lounge
+    label: Lights
+    icon: mdi:arrow-down-drop-circle
+    color: black
+    background: grey
+    action: light.turn_on
+    data:
+      brightness_step_pct: -10
+    target:
+      area_id: lounge
+  - friendly_name: brighten Lounge
+    label: Lights
+    icon: mdi:arrow-up-drop-circle
+    color: black
+    background: grey
+    action: light.turn_on
+    data:
+      brightness_step_pct: 10
+    target:
+      area_id: lounge
+app_launch_1: customlauncher Dim Lounge
+app_launch_2: customlauncher Toggle Lounge
+app_launch_3: customlauncher brighten Lounge
