@@ -11,6 +11,12 @@ services:
     network_mode: host
     environment:
       TZ: America/New_York 
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: ping -c 1 127.0.0.1:8123 || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
   music-assistant-server:
     image: ghcr.io/music-assistant/server:latest # <<< Desired release version here (or use beta to get the latest beta version)
     container_name: music-assistant-server
@@ -29,6 +35,12 @@ services:
       # Provide logging level as environment variable.
       # default=info, possible=(critical, error, warning, info, debug)
       - LOG_LEVEL=info 
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: timeout 1 bash -c 'cat < /dev/tcp/127.0.0.1/8095' || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
   matter-server:
     container_name: matter-server
     image: ghcr.io/home-assistant-libs/python-matter-server:stable
@@ -38,6 +50,12 @@ services:
     security_opt:
       # Needed for Bluetooth via dbus
       - apparmor:unconfined
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: timeout 1 bash -c 'cat < /dev/tcp/127.0.0.1/8095' || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
     volumes:
       # Create an .env file that sets the USERDIR environment variable (e.g., USERDIR=/home/user)
       - ${config_path}/matter-server/data:/data/

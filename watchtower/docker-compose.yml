@@ -15,3 +15,21 @@ services:
       WATCHTOWER_NOTIFICATION_URL: discord://BDCb0asx14Mgurj5B0iEaAfRo6G6-SO42CV8yytByAjTnCZ4XScVmZIExIwOE-3_syvU@1455689612260409539
     # command: --interval 30 # For testing
     restart: unless-stopped
+  # app:
+  #   extends:
+  #     file: ${PWD}/services.yml
+  #     service: app
+  #   labels:
+  #     autoheal-app: true
+
+  autoheal:
+    deploy:
+      replicas: 1
+    environment:
+      # AUTOHEAL_CONTAINER_LABEL: autoheal-app
+      AUTOHEAL_CONTAINER_LABEL: all
+    image: willfarrell/autoheal:latest
+    network_mode: none
+    restart: always
+    volumes: 
+      - /var/run/docker.sock:/var/run/docker.sock

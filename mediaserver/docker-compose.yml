@@ -34,6 +34,13 @@ services:
     # Optional - may be necessary for docker healthcheck to pass if running in host network mode
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: curl -c 1 127.0.0.1:8096 || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
+
 
   gluetun:
         image: qmcgaw/gluetun:latest
@@ -80,6 +87,12 @@ services:
       - PUID=1000
       - PGID=1000
       - TZ=America/New_York # Replace with your timezone
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: ping -c 1 127.0.0.1:8989 || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
     volumes:
       # - ${media_path}/media/tv:/data
       - ${secondary_drive}:/drive2
@@ -101,7 +114,12 @@ services:
       - PUID=1000 # Replace with your user ID
       - PGID=1000 # Replace with your group ID
       - TZ=America/New_York # Replace with your timezone
-
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: ping -c 1 127.0.0.1:7878 || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
     volumes:
       - ${secondary_drive}:/drive2
       - ${media_path}/media/movies:/jellyfin_media/movies
@@ -137,6 +155,12 @@ services:
     depends_on:
           gluetun:
             condition: service_healthy
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: curl -c 1 127.0.0.1:8191 || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
     # ports:
     #   - "8191:8191"
     environment:
@@ -161,7 +185,12 @@ services:
       - ${media_path}/prowlarr_media:/media # Host path for media files (accessible by Prowlarr and other Arr apps)
     # ports:
     #   - 9696:9696 # Host port:Container port
-    
+    healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: ping -c 1 127.0.0.1:9696 || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
     restart: unless-stopped
 
 
@@ -181,6 +210,12 @@ services:
         volumes:
           - ${config_path}/qbittorrent/config:/config # Persistent storage for qBittorrent config
           - ${downloads_path}:/downloads # Your download directory
+        healthcheck:
+          # test: ping -c 1 www.google.com || exit 1
+          test: ping -c 1 127.0.0.1:8082 || exit 1
+          interval: 1m
+          timeout: 10s
+          retries: 3
         restart: unless-stopped
   # transmission:
   #   image: lscr.io/linuxserver/transmission:latest

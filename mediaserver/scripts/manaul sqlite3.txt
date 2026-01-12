@@ -1,0 +1,2 @@
+sqlite3 /home/cole/Documents/media_server/jellyfin/config/data/data/jellyfin.db "SELECT Path FROM BaseItems WHERE Path LIKE '%/drive2/media/tv/Mickey%'"
+sqlite3 /home/cole/Documents/media_server/jellyfin/config/data/data/jellyfin.db "delete FROM BaseItems WHERE Path LIKE '%/drive2/media/tv/Mickey%'"
