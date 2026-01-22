@@ -35,9 +35,10 @@ services:
       # Provide logging level as environment variable.
       # default=info, possible=(critical, error, warning, info, debug)
       - LOG_LEVEL=info 
-    healthcheck:
+    healthcheck: 
           # test: ping -c 1 www.google.com || exit 1
-          test: timeout 1 bash -c 'cat < /dev/tcp/127.0.0.1/8095' || exit 1
+          # test: python3 -c "import socket; s=socket.socket(); s.settimeout(1); exit(s.connect_ex(('127.0.0.1', 8095)))" || exit 1
+          test: wget --spider --quiet https://www.google.com || exit 1   
           interval: 1m
           timeout: 10s
           retries: 3
@@ -51,8 +52,11 @@ services:
       # Needed for Bluetooth via dbus
       - apparmor:unconfined
     healthcheck:
+          # test: wget --spider --quiet https://www.google.com || exit 1   
+          test: curl -c 1 127.0.0.1:5580 || exit 1
           # test: ping -c 1 www.google.com || exit 1
-          test: timeout 1 bash -c 'cat < /dev/tcp/127.0.0.1/8095' || exit 1
+          # test: python3 -c "import socket; s=socket.socket(); s.settimeout(1); exit(s.connect_ex(('127.0.0.1', 5580)))" || exit 1
+          # test: timeout 1 bash -c 'cat < /dev/tcp/127.0.0.1/5580' || exit 1
           interval: 1m
           timeout: 10s
           retries: 3

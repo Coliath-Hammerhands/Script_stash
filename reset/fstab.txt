@@ -1,0 +1,4 @@
+# 20tb
+UUID=33c6bff9-d273-46c3-983f-97f11927a8eb /mnt/20Thdd ext4 defaults,x-systemd.device-timeout=5s
+# Seagate drive
+UUID=01495825-0100-473d-a1ec-5b8e470cbf02 /mnt/4tbhdd ext4 defaults,x-systemd.device-timeout=5s

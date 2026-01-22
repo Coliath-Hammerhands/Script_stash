@@ -70,7 +70,10 @@ services:
           - 8989:8989 # sonarr
           - 7878:7878 # radarr
           - 8191:8191 # flaresolverr
-          #transmission ports
+          - 11011:11011 # cleanuparr 
+          - 9705:9705 # huntarr
+          # - 8483:8483 # apprise-api
+          # transmission ports
           # - 9091:9091
         volumes:
           - ${config_path}/gluetun/config:/gluetun # Persistent storage for Gluetun config
@@ -217,6 +220,77 @@ services:
           timeout: 10s
           retries: 3
         restart: unless-stopped
+ 
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    restart: unless-stopped
+    network_mode: service:gluetun # Routes qBittorrent through Gluetun
+    depends_on:
+          gluetun:
+            condition: service_healthy
+    # ports:
+    #   - "11011:11011"
+    volumes:
+      - ${config_path}/cleanuparr:/config
+      # Mount your downloads directory if needed
+      - ${downloads_path}:/downloads
+    environment:
+      - PORT=11011
+      # - BASE_PATH=
+      - PUID=1000
+      - PGID=1000
+      - UMASK=022
+      - TZ=America/New_York
+    # Health check configuration
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11011/health"]
+      interval: 30s        # Check every 30 seconds
+      timeout: 10s         # Allow up to 10 seconds for response
+      start_period: 30s    # Wait 30 seconds before first check
+      retries: 3           # Mark unhealthy after 3 consecutive failures
+
+  apprise-api:
+    image: lscr.io/linuxserver/apprise-api:latest
+    container_name: apprise-api
+    # network_mode: service:gluetun # Routes qBittorrent through Gluetun
+    # depends_on:
+    #       gluetun:
+    #         condition: service_healthy
+    environment:
+      - HTTP_PORT=8483
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      # - APPRISE_ATTACH_SIZE=0 #optional
+    volumes:
+      - ${config_path}/apprise-api:/config
+      # - /path/to/apprise-api/attachments:/attachments #optional
+    ports:
+      # - 8000:8483
+      - 8483:8000
+    restart: unless-stopped 
+  huntarr:
+    image: huntarr/huntarr:latest
+    container_name: huntarr
+    restart: unless-stopped 
+    network_mode: service:gluetun # Routes qBittorrent through Gluetun
+    depends_on:
+          gluetun:
+            condition: service_healthy
+    # ports:
+    #   - "9705:9705"
+    volumes:
+      - ${config_path}/huntarr:/config
+    environment:
+      - TZ=America/New_York
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9705/health"]
+      interval: 30s        # Check every 30 seconds
+      timeout: 10s         # Allow up to 10 seconds for response
+      start_period: 30s    # Wait 30 seconds before first check
+      retries: 3           # Mark unhealthy after 3 consecutive failures
+
   # transmission:
   #   image: lscr.io/linuxserver/transmission:latest
   #   container_name: transmission
