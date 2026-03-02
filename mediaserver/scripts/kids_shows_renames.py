@@ -1,6 +1,6 @@
 import os
 import re
-from moviepy.editor import VideoFileClip
+from moviepy import VideoFileClip
 import numpy as np
 
 folder = "/mnt/20Thdd"
@@ -64,8 +64,8 @@ def new_name_of_episode(file_name):
 
 
 arc_template = "/Season {}"
-for series in ["Mickey Mouse - Mixed-Up Adventures", "Iron Man and His Awesome Friends", "Mickey Mouse Funhouse"]:
-    season_range = list(range(1, 8))
+for series in ["Mickey Mouse - Mixed-Up Adventures", "Iron Man and His Awesome Friends", "Mickey Mouse Funhouse", "The Amazing World of Gumball"]:
+    season_range = list(range(1, 10))
     if series in ("Big City Greens"):
         season_range = [1]
     for season in season_range:

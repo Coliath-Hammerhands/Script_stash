@@ -6,7 +6,7 @@ import time
 
 folder = "/mnt/20Thdd"
 path = "media/kids"
-season = 1
+season = 2
 lacking_pattern = r"S\d{2}E\d{2}"
 correct_pattern = r"S\d{2}E\d{2}E\d{2}"
 lowercase_lacking = r"s\d{2}e\d{2}"
@@ -60,9 +60,85 @@ def new_name_of_episode_temp(file_name):
         raise ValueError(f"No matching pattern found in filename: {file_name}")
 
 
+def modify_episode_format(file_name):
+    # Split the file name into parts
+    parts = file_name.split(".")
+    name, ext = os.path.splitext(file_name)
+    pattern = r"(\w+)\.(S|E)\d+(?:[E\d]+)*\.([A-Z][\w-]+\.\d+p\.NF\.WEB-DL\.DDP5\.1\.x264-LAZY)"
+    # Search for a match in the file name
+    match = re.search(pattern, file_name)
+
+    if match:
+        # Extract the modified episode numbers from the match
+        s_number = int(match.group(2).strip("S")) if "S" in match.group(2) else None
+        e_number = int(match.group(3)) if "E" not in match.group(3) else match.group(3).replace("E", "")
+
+        # Modify the episode numbers based on their values
+        if s_number is not None and e_number >= 37:
+            new_e_number = str(e_number + 1)
+            modified_file_name = file_name.replace(f"{match.group(2)}{match.group(3)}", f"{match.group(1)}.E{e_number}E{new_e_number}")
+        elif s_number is not None and e_number < 37:
+            modified_file_name = file_name
+        else:
+            return file_name
+    # # Check if the episode number is less than 37
+    # if int(parts[2].split("E")[1]) < 37:
+    #     return "pass", file_name
+
+    # Modify the episode numbers
+    modified_parts = parts[:]
+    if len(modified_parts) >= 4 and len(modified_parts[3].split("E")) == 2:
+        s_number, e_number = int(modified_parts[3].split("E")[0]), int(modified_parts[3].split("E")[1])
+        modified_s_number, modified_e_number = str(s_number + 1), str(e_number + 1)
+    else:
+        random_string = generate_random_string() + ext
+        return random_string, file_name
+
+    # Replace the original episode numbers with the modified ones
+    modified_file_name = ".".join([modified_parts[0], modified_parts[1], modified_s_number, modified_e_number, modified_parts[-3]])
+
+    print(f"Modified file name: {modified_file_name}")
+    random_string = generate_random_string() + ext
+    return random_string, modified_file_name
+
+
+def adjust_episodes(filename):
+    # Pattern to find 'S' followed by season digits, then one or more 'E' followed by episode digits
+    # Example matches: "S02E37", "S02E38E39"
+    pattern = r"(S\d+)((?:E\d+)+)"
+    name, ext = os.path.splitext(filename)
+    random_string = generate_random_string() + ext
+
+    def replacement(match):
+        season_part = match.group(1)  # e.g., "S02"
+        episodes_part = match.group(2)  # e.g., "E37" or "E38E39"
+
+        # Extract all episode numbers as integers
+        nums = [int(n) for n in re.findall(r"\d+", episodes_part)]
+
+        # Rule 1: If any episode is less than 37, leave it alone
+        if any(n < 37 for n in nums):
+            # return "pass"
+            return match.group(0)
+
+        # Rule 2: If the episode is exactly 37, make it E37E38
+        if nums == [37]:
+            return f"{season_part}E37E38"
+
+        # Rule 3: If episodes are > 37, add 1 to each
+        if all(n > 37 for n in nums) or (len(nums) > 1 and 37 in nums):
+            # Reconstruct the string by incrementing each number found
+            new_episodes = re.sub(r"\d+", lambda m: f"{int(m.group()) + 1:02d}", episodes_part)
+            return f"{season_part}{new_episodes}"
+
+        return match.group(0)
+
+    return random_string, re.sub(pattern, replacement, filename)
+
+
 arc_template = "/Season {}"
 for series in ["PJ Masks"]:
-    for season in [4]:
+    for season in [2]:
         temp_names = {}
         old_to_temp = {}
         arc = series + arc_template.format(season)
@@ -74,7 +150,9 @@ for series in ["PJ Masks"]:
                 if not correct_or_not(file):
                     continue
                 old_path = os.path.join(folder, path, arc, file)
-                temp_name, new_name = new_name_of_episode_temp(file)
+                temp_name, new_name = adjust_episodes(file)
+                if new_name == file:
+                    continue
                 old_to_temp[file] = temp_name
                 temp_names[temp_name] = new_name
                 new_path = os.path.join(folder, path, arc, temp_name)

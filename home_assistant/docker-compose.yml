@@ -65,6 +65,27 @@ services:
       - ${config_path}/matter-server/data:/data/
       # Required for Bluetooth via D-Bus (uncomment if using Bluetooth)
       # - /run/dbus:/run/dbus:ro
+#     ports:
+#       - "5580:5580" # Matter server port
+#     networks:
+#       default:
+#       iot_vlan:
+#         ipv4_address: 192.168.30.50 # Assign a static IP in the IoT range
+
+# networks:
+#   # Your standard internal Docker bridge
+#   default:
+#     driver: bridge
+
+#   # The direct connection to your IoT VLAN
+#   iot_vlan:
+#     driver: macvlan
+#     driver_opts:
+#       parent: enp1s0.30  # Example: eth0.20 if your IoT VLAN is 20
+#     ipam:
+#       config:
+#         - subnet: 192.168.30.0/24
+#           gateway: 192.168.30.1
 #   music-assistant-skill:
 #     image: ghcr.io/alams154/music-assistant-skill:dev
 #     environment:

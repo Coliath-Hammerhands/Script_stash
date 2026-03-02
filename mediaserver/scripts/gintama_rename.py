@@ -32,29 +32,29 @@ def correct_numbering(name, number_str, ext, min_number):
     return name + " " + str(number).zfill(2) + ext
 
 
-for file in os.listdir(os.path.join(folder, path, arc)):
-    if "[CBT]" not in file:
-        continue
-    old_path = os.path.join(folder, path, arc, file)
-    new_name = parse_episode(file)
-    new_path = os.path.join(folder, path, arc, new_name)
-    print(f"Renaming:\n{old_path}\nto\n{new_path}\n")
-    os.rename(old_path, new_path)
+# for file in os.listdir(os.path.join(folder, path, arc)):
+#     if "[CBT]" not in file:
+#         continue
+#     old_path = os.path.join(folder, path, arc, file)
+#     new_name = parse_episode(file)
+#     new_path = os.path.join(folder, path, arc, new_name)
+#     print(f"Renaming:\n{old_path}\nto\n{new_path}\n")
+#     os.rename(old_path, new_path)
 
-min_number = min([pull_ep_number(f.split(".")[0])[1] for f in os.listdir(os.path.join(folder, path, arc)) if "[CBT]" not in f])
+# min_number = min([pull_ep_number(f.split(".")[0])[1] for f in os.listdir(os.path.join(folder, path, arc)) if "[CBT]" not in f])
 
 
-if min_number != 1:
-    print(f"Minimum episode number is {min_number}, correcting numbering to start from 1.\n")
-    for file in os.listdir(os.path.join(folder, path, arc)):
-        if "[CBT]" in file:
-            continue
-        old_path = os.path.join(folder, path, arc, file)
-        name, ep, ext = pull_ep_number(file)
-        new_name = correct_numbering(name, ep, ext, min_number)
-        new_path = os.path.join(folder, path, arc, new_name)
-        print(f"Renaming:\n{old_path}\nto\n{new_path}\n")
-        os.rename(old_path, new_path)
+# if min_number != 1:
+#     print(f"Minimum episode number is {min_number}, correcting numbering to start from 1.\n")
+#     for file in os.listdir(os.path.join(folder, path, arc)):
+#         if "[CBT]" in file:
+#             continue
+#         old_path = os.path.join(folder, path, arc, file)
+#         name, ep, ext = pull_ep_number(file)
+#         new_name = correct_numbering(name, ep, ext, min_number)
+#         new_path = os.path.join(folder, path, arc, new_name)
+#         print(f"Renaming:\n{old_path}\nto\n{new_path}\n")
+#         os.rename(old_path, new_path)
 
 pattern1 = r"Gintama \d{2}"
 pattern2 = r"Gintama \d{3}"
@@ -136,7 +136,8 @@ def new_name_of_episode(file_name, season):
     raise ValueError(f"No matching pattern found in filename: {file_name}")
 
 
-for season in [1, 2, 3, 4, 5, 6]:
+# for season in [1, 2, 3, 4, 5, 6]:
+for season in [1]:
     arc = f"Gintama/Season {season}"
     if not os.path.exists(os.path.join(folder, path, arc)):
         continue
@@ -149,7 +150,7 @@ for season in [1, 2, 3, 4, 5, 6]:
             new_name = new_name_of_episode(file, season)
             new_path = os.path.join(folder, path, arc, new_name)
             print(f"Renaming:\n{old_path}\nto\n{new_path}\n")
-            # os.rename(old_path, new_path)
+            os.rename(old_path, new_path)
             time.sleep(0.2)
         except Exception as e:
             print(f"Error processing file {file}: {e}")
